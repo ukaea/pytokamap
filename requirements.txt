@@ -1,3 +1,4 @@
-pydantic
+Jinja2
+pytest
 xarray
 zarr
