@@ -1,0 +1,28 @@
+[project]
+name = "pytokamap"
+version = "2024.0.0"
+dynamic = ["dependencies"]
+requires-python = ">=3.11"
+authors = [
+]
+maintainers = [
+  {name = "Samuel Jackson", email = "samuel.jackson@ukaea.uk"}
+]
+description = "A python library for mapping between Fusion data formats"
+readme = "README.md"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+
+[tool.setuptools]
+packages = ["pytokamap"]
+py-modules = ["__init__"] #
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+
+[project.urls]
+Repository = "https://github.com/samueljackson92/pytokamap.git"
+"Bug Tracker" = "https://github.com/samueljackson92/pytokamap/issues"
