@@ -50,6 +50,27 @@ class CustomNode(MapNode):
     parents: dict[str, "MapNode"] = field(default_factory=dict)
 
 
+class NodeNames(str, Enum):
+    PLUGIN = "PLUGIN"
+    CUSTOM = "CUSTOM"
+
+
+class NodeRegistry:
+    def __init__(self) -> None:
+        self._plugins = {}
+
+    def register(self, name: str, cls: t.Type[MapNode]):
+        self._plugins[name] = cls
+
+    def create(self, name: str, *args, **kwargs) -> MapNode:
+        return self._plugins[name](*args, **kwargs)
+
+
+node_registry = NodeRegistry()
+node_registry.register(NodeNames.PLUGIN, PluginNode)
+node_registry.register(NodeNames.CUSTOM, CustomNode)
+
+
 @dataclass
 class Mapping:
     nodes: dict[str, MapNode]
@@ -92,11 +113,7 @@ class MappingReader:
         # Build dict of all the nodes
         for key, item in data.items():
             item = self._lower_keys(item)
-            if item["map_type"] == "PLUGIN":
-                node = PluginNode(**item)
-            else:
-                node = CustomNode(**item)
-            nodes[key] = node
+            nodes[key] = node_registry.create(item["map_type"], **item)
 
         # Add the parents of every node
         for key, node in nodes.items():
