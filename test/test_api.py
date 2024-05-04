@@ -50,6 +50,15 @@ def test_convert_zarr_to_zarr(tmp_path, mapping_files, zarr_file):
     assert Path(target).exists()
 
 
+@pytest.mark.skipif(not uda_available, reason="UDA is not available")
+def test_convert_uda_to_zarr(tmp_path, uda_mapping_files):
+    target = tmp_path
+    mapper = pytokamap.create_mapping(*uda_mapping_files)
+    mapper.to_zarr(30420, target)
+
+    assert Path(target).exists()
+
+
 def test_convert_zarr_to_zarr_delay_compute(tmp_path, mapping_files, zarr_file):
     target = tmp_path
     mapper = pytokamap.create_mapping(*mapping_files)
