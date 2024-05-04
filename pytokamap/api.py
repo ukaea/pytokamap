@@ -15,26 +15,25 @@ class MapperAPI:
         mapping = reader.read(template, global_data)
         return MapperAPI(mapping)
 
-    def load(self, source: Source) -> Datasets:
+    def load(self, source: Source, compute: bool = False) -> Datasets:
         builder = DatasetTransformBuilder(self.mapping)
         transformer = builder.build()
-        return transformer.transform(source)
+        result = transformer.transform(source)
+        return result.compute() if compute else result
 
     def convert(
-        self, source: Source, target: Target, target_format: str, compute: bool = False
+        self, source: Source, target: Target, target_format: str, compute: bool = True
     ):
         builder = DatasetTransformBuilder(self.mapping)
         target_format = writer_registry.create(target_format)
         transformer = builder.build(FileTransformer, target_format)
         result = transformer.transform(source, target)
-        if compute:
-            result = result.compute()
-        return result
+        return result.compute() if compute else result
 
-    def to_netcdf(self, source: Source, target: Target, compute: bool = False):
+    def to_netcdf(self, source: Source, target: Target, compute: bool = True):
         return self.convert(source, target, WriterNames.NETCDF)
 
-    def to_zarr(self, source: Source, target: Target, compute: bool = False):
+    def to_zarr(self, source: Source, target: Target, compute: bool = True):
         return self.convert(source, target, WriterNames.ZARR)
 
 
