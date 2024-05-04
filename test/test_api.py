@@ -23,8 +23,8 @@ def test_convert_zarr_to_netcdf(tmpdir, mapping_files, zarr_file):
     assert Path(target).exists()
 
 
-def test_convert_zarr_to_zarr(tmpdir, mapping_files, zarr_file):
-    target = tmpdir / "30420_another.zarr"
+def test_convert_zarr_to_zarr(tmp_path, mapping_files, zarr_file):
+    target = tmp_path
     mapper = pytokamap.create_mapping(*mapping_files)
     mapper.to_zarr(zarr_file, target)
 

@@ -1,3 +1,4 @@
+import dask.delayed
 import zarr
 import dask.delayed
 import xarray as xr
@@ -30,23 +31,10 @@ class NetCDFWriter(DatasetsWriter):
 
 class ZarrWriter(DatasetsWriter):
 
-    def write(self, datasets: Datasets, target: Target):
-        synchronizer = zarr.ProcessSynchronizer(f"/tmp/{target}.sync")
-        results = []
-        groups = []
-        for group, dataset in datasets.items():
-            result = dataset.to_zarr(
-                target, group=group, mode="a", compute=False, synchronizer=synchronizer
-            )
-            results.append(result)
-            groups.append(group)
-
-        result = self.consolidate(results, target, groups)
-        return result
-
     @dask.delayed
-    def consolidate(self, results, target, groups):
-        dask.compute(results)
+    def write(self, datasets: Datasets, target: Target):
+        for group, dataset in datasets.items():
+            dataset.to_zarr(target, group=group, mode="a")
         zarr.consolidate_metadata(target)
 
 
