@@ -60,7 +60,9 @@ class DatasetTransformBuilder:
 
         for key, node in self.mapping.nodes.items():
             if node.map_type == MapType.PLUGIN:
-                transforms[key] = plugin_registry.create(node.plugin, **node.args)
+                transforms[key] = plugin_registry.create(
+                    node.plugin, scale=node.scale, **node.args
+                )
             elif node.map_type == MapType.CUSTOM:
                 pass
             else:

@@ -27,30 +27,41 @@ class Plugin:
 
 
 class LoadZarr(Plugin):
-    def __init__(self, signal: str) -> None:
+    def __init__(self, signal: str, scale: float = 1):
         super().__init__()
         self.signal = signal
+        self.scale = scale
 
     @dask.delayed()
     def __call__(self, file_name: t.Union[str, Path]) -> xr.Dataset:
         dataset = xr.open_dataset(file_name, group=self.signal, engine="zarr")
+        dataset["data"] = dataset["data"] * self.scale
         return dataset
 
 
 class LoadUDA(Plugin):
-    def __init__(self, signal: str, format: UDAFormat, type: UDAType = UDAType.SIGNAL):
+    def __init__(
+        self,
+        signal: str,
+        format: UDAFormat,
+        scale: float = 1,
+        type: UDAType = UDAType.SIGNAL,
+    ):
         super().__init__()
         self.signal = signal
-        self.client = MASTClient()
         self.type = type
         self.format = format
+        self.scale = scale
 
     @dask.delayed()
     def __call__(self, shot: int) -> xr.Dataset:
+        client = MASTClient()
         if self.type == UDAType.SIGNAL:
-            return self.client.get_signal(shot, self.signal, self.format)
+            dataset = client.get_signal(shot, self.signal, self.format)
         else:
-            return self.client.get_image(shot, self.signal)
+            dataset = client.get_image(shot, self.signal)
+        dataset["data"] = dataset["data"] * self.scale
+        return dataset
 
 
 class PluginRegistry:
@@ -60,8 +71,10 @@ class PluginRegistry:
     def register(self, name: str, cls: t.Type[Plugin]):
         self._plugins[name] = cls
 
-    def create(self, name: str, *args, **kwargs) -> Plugin:
-        return self._plugins[name](*args, **kwargs)
+    def create(
+        self, name: str, *args, scale: t.Optional[float] = None, **kwargs
+    ) -> Plugin:
+        return self._plugins[name](*args, scale=scale, **kwargs)
 
 
 plugin_registry = PluginRegistry()

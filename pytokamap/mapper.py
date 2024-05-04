@@ -50,13 +50,12 @@ class MapType(str, Enum):
 class MapNode:
     map_type: MapType
     args: dict[str, str]
-    scale: t.Optional[float] = None
 
 
 @dataclass
 class PluginNode(MapNode):
     plugin: str = None
-    scale: t.Optional[float] = None
+    scale: t.Optional[float] = 1
 
 
 @dataclass
