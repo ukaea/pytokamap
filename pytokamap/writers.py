@@ -1,3 +1,4 @@
+import dask
 import typing as t
 from abc import abstractmethod
 from enum import Enum
@@ -18,6 +19,7 @@ class DatasetsWriter:
 
 class NetCDFWriter(DatasetsWriter):
 
+    @dask.delayed()
     def write(self, datasets: Datasets, target: Target):
         for group, dataset in datasets.items():
             dataset.to_netcdf(target, group=group, mode="a")
@@ -25,6 +27,7 @@ class NetCDFWriter(DatasetsWriter):
 
 class ZarrWriter(DatasetsWriter):
 
+    @dask.delayed()
     def write(self, datasets: Datasets, target: Target):
         for group, dataset in datasets.items():
             dataset.to_zarr(target, group=group)

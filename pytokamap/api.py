@@ -20,17 +20,22 @@ class MapperAPI:
         transformer = builder.build()
         return transformer.transform(source)
 
-    def convert(self, source: Source, target: Target, target_format: str):
+    def convert(
+        self, source: Source, target: Target, target_format: str, compute: bool = False
+    ):
         builder = DatasetTransformBuilder(self.mapping)
         target_format = writer_registry.create(target_format)
         transformer = builder.build(FileTransformer, target_format)
-        transformer.transform(source, target)
+        result = transformer.transform(source, target)
+        if compute:
+            result = result.compute()
+        return result
 
-    def to_netcdf(self, source: Source, target: Target):
-        self.convert(source, target, WriterNames.NETCDF)
+    def to_netcdf(self, source: Source, target: Target, compute: bool = False):
+        return self.convert(source, target, WriterNames.NETCDF)
 
-    def to_zarr(self, source: Source, target: Target):
-        self.convert(source, target, WriterNames.ZARR)
+    def to_zarr(self, source: Source, target: Target, compute: bool = False):
+        return self.convert(source, target, WriterNames.ZARR)
 
 
 def create_mapping(template, global_data):

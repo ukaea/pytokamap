@@ -1,4 +1,6 @@
 from pathlib import Path
+from dask.distributed import Client
+
 from pytokamap.mapper import MappingReader
 from pytokamap.transforms import (
     DatasetTransformBuilder,
@@ -20,12 +22,14 @@ def test_dataset_transform_builder(mapping_files):
 
 
 def test_transform_zarr(mapping_files, zarr_file):
+    client = Client()
     reader = MappingReader()
     mapping = reader.read(*mapping_files)
 
     builder = DatasetTransformBuilder(mapping)
     transformer = builder.build(DatasetTransformer)
     datasets = transformer.transform(zarr_file)
+    datasets = client.gather(datasets)
 
     assert len(datasets)
     assert "amc/plasma_current" in datasets
@@ -42,6 +46,7 @@ def test_file_transformer(tmpdir, mapping_files, zarr_file):
 
     builder = DatasetTransformBuilder(mapping)
     transformer = builder.build(FileTransformer, writer=NetCDFWriter())
-    transformer.transform(zarr_file, netcdf_file)
+    result = transformer.transform(zarr_file, netcdf_file)
+    result.compute()
 
     assert Path(netcdf_file).exists()

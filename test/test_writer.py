@@ -6,7 +6,8 @@ from pytokamap.writers import NetCDFWriter, ZarrWriter
 def test_write_zarr(tmpdir, datasets):
     output_file = tmpdir / "30420.zarr"
     writer = ZarrWriter()
-    writer.write(datasets, output_file)
+    result = writer.write(datasets, output_file)
+    result.compute()
 
     assert Path(output_file).exists()
 
@@ -17,7 +18,8 @@ def test_write_zarr(tmpdir, datasets):
 def test_write_netcdf(tmpdir, datasets):
     output_file = tmpdir / "30420.nc"
     writer = NetCDFWriter()
-    writer.write(datasets, output_file)
+    result = writer.write(datasets, output_file)
+    result.compute()
 
     assert Path(output_file).exists()
 

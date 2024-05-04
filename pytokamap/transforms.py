@@ -31,7 +31,7 @@ class FileTransformer(Transformer):
 
     def transform(self, source: Source, target: Target):
         datasets = self.transformer.transform(source)
-        self.writer.write(datasets, target)
+        return self.writer.write(datasets, target)
 
 
 class DatasetTransformBuilder:
@@ -43,6 +43,7 @@ class DatasetTransformBuilder:
         self, transform_cls: t.Optional[t.Type[Transformer]] = None, *args, **kwargs
     ) -> Transformer:
         transforms = {}
+
         for key, node in self.mapping.nodes.items():
             if node.map_type == MapType.PLUGIN:
                 transforms[key] = plugin_registry.create(node.plugin, **node.args)

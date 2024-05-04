@@ -1,7 +1,9 @@
 import typing as t
-import xarray as xr
 from enum import Enum
 from pathlib import Path
+
+import dask
+import xarray as xr
 
 
 class PluginNames(str, Enum):
@@ -17,6 +19,7 @@ class LoadZarr(Plugin):
         super().__init__()
         self.signal = signal
 
+    @dask.delayed()
     def __call__(self, file_name: t.Union[str, Path]) -> xr.Dataset:
         dataset = xr.open_dataset(file_name, group=self.signal, engine="zarr")
         return dataset
