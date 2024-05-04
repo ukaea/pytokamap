@@ -62,8 +62,18 @@ def mapping_files(tmpdir):
             "MAP_TYPE": "PLUGIN",
             "PLUGIN": "ZARR",
             "ARGS": {"signal": "xsx/tcam_{{ index }}"}
-        }{{ comma(loop) }}
+        },
         {% endfor %}
+
+        "xsx/tcam": {
+            "MAP_TYPE": "CUSTOM",
+            "CUSTOM_TYPE": "COMBINE",
+            "ARGS": [
+                {% for index in range(1, TCAM.N+1) %}
+                    "_xsx/tcam_{{index}}"{{ comma(loop) }}
+                {% endfor %}
+            ]
+        }
     }
     """
 

@@ -31,10 +31,10 @@ class MapperAPI:
         return result.compute() if compute else result
 
     def to_netcdf(self, source: Source, target: Target, compute: bool = True):
-        return self.convert(source, target, WriterNames.NETCDF)
+        return self.convert(source, target, WriterNames.NETCDF, compute)
 
     def to_zarr(self, source: Source, target: Target, compute: bool = True):
-        return self.convert(source, target, WriterNames.ZARR)
+        return self.convert(source, target, WriterNames.ZARR, compute)
 
 
 def create_mapping(template, global_data):

@@ -1,7 +1,7 @@
 import typing as t
 import json
 from jinja2 import Template
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from enum import Enum
 
@@ -31,15 +31,26 @@ class MapType(str, Enum):
     CUSTOM = "CUSTOM"
 
 
-@dataclass(slots=True)
+@dataclass(kw_only=True)
 class MapNode:
     map_type: MapType
-    plugin: str
     args: dict[str, str]
     scale: t.Optional[float] = None
 
 
-@dataclass(slots=True)
+@dataclass(kw_only=True)
+class PluginNode(MapNode):
+    plugin: str = None
+    scale: t.Optional[float] = None
+
+
+@dataclass(kw_only=True)
+class CustomNode(MapNode):
+    custom_type: t.Optional[str] = None
+    parents: dict[str, "MapNode"] = field(default_factory=dict)
+
+
+@dataclass
 class Mapping:
     nodes: dict[str, MapNode]
 
@@ -77,10 +88,21 @@ class MappingReader:
 
     def _load_mapping(self, data: dict) -> Mapping:
         nodes = {}
+
+        # Build dict of all the nodes
         for key, item in data.items():
             item = self._lower_keys(item)
-            node = MapNode(**item)
+            if item["map_type"] == "PLUGIN":
+                node = PluginNode(**item)
+            else:
+                node = CustomNode(**item)
             nodes[key] = node
+
+        # Add the parents of every node
+        for key, node in nodes.items():
+            if node.map_type == MapType.CUSTOM:
+                node.parents = [nodes[key] for key in node.args]
+
         return nodes
 
     def _lower_keys(self, item: dict) -> dict:

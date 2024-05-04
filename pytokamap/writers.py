@@ -31,23 +31,23 @@ class NetCDFWriter(DatasetsWriter):
 class ZarrWriter(DatasetsWriter):
 
     def write(self, datasets: Datasets, target: Target):
+        synchronizer = zarr.ProcessSynchronizer(f"/tmp/{target}.sync")
         results = []
+        groups = []
         for group, dataset in datasets.items():
-            self._do_write(dataset, target, group)
-            result = dataset.to_zarr(target, group=group)
+            result = dataset.to_zarr(
+                target, group=group, mode="a", compute=False, synchronizer=synchronizer
+            )
             results.append(result)
+            groups.append(group)
 
-        @dask.delayed
-        def consolidate(results, target):
-            dask.compute(results)
-            zarr.consolidate_metadata(target)
-
-        result = consolidate(results, target)
+        result = self.consolidate(results, target, groups)
         return result
 
-    @dask.delayed()
-    def _do_write(self, dataset: xr.Dataset, target: Target, group: str):
-        dataset.to_zarr(target, group=group)
+    @dask.delayed
+    def consolidate(self, results, target, groups):
+        dask.compute(results)
+        zarr.consolidate_metadata(target)
 
 
 class WriterRegistry:

@@ -18,7 +18,7 @@ def test_dataset_transform_builder(mapping_files):
     transformer = builder.build()
 
     assert isinstance(transformer, DatasetTransformer)
-    assert len(transformer.transforms) == 4
+    assert len(transformer.transforms) == 5
 
 
 def test_transform_zarr(mapping_files, zarr_file):

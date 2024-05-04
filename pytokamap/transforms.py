@@ -1,9 +1,23 @@
 from abc import abstractmethod
 import typing as t
+import dask
+import xarray as xr
 from pytokamap.mapper import MapType, Mapping
 from pytokamap.writers import DatasetsWriter
 from pytokamap.plugins import plugin_registry
 from pytokamap.types import Transforms, Datasets, Source, Target
+
+
+class Combiner:
+    def __init__(self, parents) -> None:
+        super().__init__()
+        self.parents = parents
+
+    @dask.delayed()
+    def __call__(self, *args, **kwargs) -> xr.Dataset:
+        results = [item(*args, **kwargs) for item in self.parents]
+        (datasets,) = dask.compute(results)
+        return xr.combine_nested(datasets, concat_dim="channel")
 
 
 class Transformer:
@@ -47,8 +61,15 @@ class DatasetTransformBuilder:
         for key, node in self.mapping.nodes.items():
             if node.map_type == MapType.PLUGIN:
                 transforms[key] = plugin_registry.create(node.plugin, **node.args)
+            elif node.map_type == MapType.CUSTOM:
+                pass
             else:
                 raise RuntimeError(f"Unknown map type {node.map_type}")
+
+        for key, node in self.mapping.nodes.items():
+            if node.map_type == MapType.CUSTOM:
+                parents = [transforms[key] for key in node.args]
+                transforms[key] = Combiner(parents)
 
         transform_cls = DatasetTransformer if transform_cls is None else transform_cls
         transformer = transform_cls(transforms, *args, **kwargs)

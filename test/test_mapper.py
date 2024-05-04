@@ -7,4 +7,4 @@ def test_load_mappings(mapping_files):
     mapping = reader.read(mapping_file, globals_file)
 
     assert isinstance(mapping.nodes, dict)
-    assert len(mapping.nodes) == 4
+    assert len(mapping.nodes) == 5
