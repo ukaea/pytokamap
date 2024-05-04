@@ -28,7 +28,6 @@ def test_convert_zarr_to_zarr(tmpdir, mapping_files, zarr_file):
     target = tmpdir / "30420_another.zarr"
     mapper = pytokamap.create_mapping(*mapping_files)
     result = mapper.to_zarr(zarr_file, target)
-    result.visualize(filename="transpose.svg")
     result.compute()
 
     assert Path(target).exists()
