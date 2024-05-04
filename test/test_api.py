@@ -1,7 +1,14 @@
 from pathlib import Path
 import xarray as xr
-import dask
+import pytest
 import pytokamap
+
+try:
+    import pyuda
+
+    uda_available = True
+except ImportError:
+    uda_available = False
 
 
 def test_load_dataset(mapping_files, zarr_file):
@@ -13,6 +20,18 @@ def test_load_dataset(mapping_files, zarr_file):
     result = datasets["amc/plasma_current"].compute()
     assert isinstance(result, xr.Dataset)
     assert result.data.shape == (100,)
+
+
+@pytest.mark.skipif(not uda_available, reason="UDA is not available")
+def test_load_dataset_uda(uda_mapping_files):
+    mapper = pytokamap.create_mapping(*uda_mapping_files)
+    datasets = mapper.load(30420)
+
+    assert "amc/plasma_current" in datasets
+
+    result = datasets["amc/plasma_current"].compute()
+    assert isinstance(result, xr.Dataset)
+    assert result.data.shape == (30000,)
 
 
 def test_convert_zarr_to_netcdf(tmpdir, mapping_files, zarr_file):

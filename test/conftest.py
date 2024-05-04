@@ -88,3 +88,48 @@ def mapping_files(tmpdir):
         json.dump(contents, f)
 
     return file_name, globals_file_name
+
+
+@pytest.fixture()
+def uda_mapping_files(tmpdir):
+    contents = """{
+        {% macro comma(loop) %}
+            {% if not loop.last %},{% endif %}
+        {% endmacro %}
+
+        "amc/plasma_current": {
+            "MAP_TYPE": "PLUGIN",
+            "PLUGIN": "UDA",
+            "ARGS": {"signal": "ip", "format": "IDA"},
+            "SCALE": 1000
+        },
+        {% for index in range(1, TCAM.N+1) %}
+        "_xsx/tcam_{{index}}": {
+            "MAP_TYPE": "PLUGIN",
+            "PLUGIN": "UDA",
+            "ARGS": {"signal": "XSX/TCAM/{{ index }}", "format": "IDA"}
+        },
+        {% endfor %}
+        "xsx/tcam": {
+            "MAP_TYPE": "CUSTOM",
+            "CUSTOM_TYPE": "COMBINE",
+            "ARGS": [
+                {% for index in range(1, TCAM.N+1) %}
+                    "_xsx/tcam_{{index}}"{{ comma(loop) }}
+                {% endfor %}
+            ]
+        }
+    }
+    """
+
+    file_name = tmpdir / "template.j2"
+    with Path(file_name).open("w") as f:
+        f.write(contents)
+
+    contents = {"TCAM": {"N": 3}}
+
+    globals_file_name = tmpdir / "globals.json"
+    with Path(globals_file_name).open("w") as f:
+        json.dump(contents, f)
+
+    return file_name, globals_file_name
