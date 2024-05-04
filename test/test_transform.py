@@ -1,5 +1,5 @@
 from pathlib import Path
-from dask.distributed import Client
+import dask
 
 from pytokamap.mapper import MappingReader
 from pytokamap.transforms import (
@@ -22,20 +22,21 @@ def test_dataset_transform_builder(mapping_files):
 
 
 def test_transform_zarr(mapping_files, zarr_file):
-    client = Client()
     reader = MappingReader()
     mapping = reader.read(*mapping_files)
 
     builder = DatasetTransformBuilder(mapping)
     transformer = builder.build(DatasetTransformer)
     datasets = transformer.transform(zarr_file)
-    datasets = client.gather(datasets)
+    (datasets,) = dask.compute(datasets)
 
     assert len(datasets)
     assert "amc/plasma_current" in datasets
     assert "_xsx/tcam_1" in datasets
     assert "_xsx/tcam_2" in datasets
     assert "_xsx/tcam_3" in datasets
+
+    assert datasets["amc/plasma_current"]["data"].shape == (100,)
 
 
 def test_file_transformer(tmpdir, mapping_files, zarr_file):

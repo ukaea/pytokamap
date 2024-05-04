@@ -1,5 +1,8 @@
-import dask
+import zarr
+import dask.delayed
+import xarray as xr
 import typing as t
+import dask
 from abc import abstractmethod
 from enum import Enum
 from pytokamap.types import Datasets, Target
@@ -27,10 +30,24 @@ class NetCDFWriter(DatasetsWriter):
 
 class ZarrWriter(DatasetsWriter):
 
-    @dask.delayed()
     def write(self, datasets: Datasets, target: Target):
+        results = []
         for group, dataset in datasets.items():
-            dataset.to_zarr(target, group=group)
+            self._do_write(dataset, target, group)
+            result = dataset.to_zarr(target, group=group)
+            results.append(result)
+
+        @dask.delayed
+        def consolidate(results, target):
+            dask.compute(results)
+            zarr.consolidate_metadata(target)
+
+        result = consolidate(results, target)
+        return result
+
+    @dask.delayed()
+    def _do_write(self, dataset: xr.Dataset, target: Target, group: str):
+        dataset.to_zarr(target, group=group)
 
 
 class WriterRegistry:
