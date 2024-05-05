@@ -3,3 +3,5 @@ pytest
 xarray
 zarr
 dask
+mkdocs
+mkdocs-material
