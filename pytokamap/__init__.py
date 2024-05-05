@@ -1,1 +1,1 @@
-from .api import create_mapping
+from .api import load_mapping

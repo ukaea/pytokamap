@@ -12,7 +12,7 @@ from pytokamap.writers import NetCDFWriter
 
 def test_dataset_transform_builder(mapping_files):
     reader = MappingReader()
-    mapping = reader.read(*mapping_files)
+    mapping = reader.build(*mapping_files)
 
     builder = DatasetTransformBuilder(mapping)
     transformer = builder.build()
@@ -23,7 +23,7 @@ def test_dataset_transform_builder(mapping_files):
 
 def test_transform_zarr(mapping_files, zarr_file):
     reader = MappingReader()
-    mapping = reader.read(*mapping_files)
+    mapping = reader.build(*mapping_files)
 
     builder = DatasetTransformBuilder(mapping)
     transformer = builder.build(DatasetTransformer)
@@ -43,7 +43,7 @@ def test_file_transformer(tmpdir, mapping_files, zarr_file):
     netcdf_file = tmpdir / "30420.nc"
 
     reader = MappingReader()
-    mapping = reader.read(*mapping_files)
+    mapping = reader.build(*mapping_files)
 
     builder = DatasetTransformBuilder(mapping)
     transformer = builder.build(FileTransformer, writer=NetCDFWriter())

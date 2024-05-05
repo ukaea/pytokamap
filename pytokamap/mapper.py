@@ -21,22 +21,7 @@ def read_template(path: str) -> Template:
         return Template(f.read())
 
 
-# Keyword only meta class.
-# This can be replaced with dataclasses(kw_only=True) in newer versions of python
-class KwOnlyMeta(type):
-    def __call__(cls, *args, **kwargs):
-        if args:
-            raise TypeError(
-                f"{cls.__name__} constructor does not accept positional arguments"
-            )
-        extra_kwargs = set(kwargs) - set(cls.__annotations__)
-        if extra_kwargs:
-            raise TypeError(
-                f"{cls.__name__} constructor got unexpected keyword arguments: {', '.join(extra_kwargs)}"
-            )
-        return super().__call__(**kwargs)
-
-
+@dataclass(slots=True)
 class Mapping:
     pass
 
@@ -46,19 +31,19 @@ class MapType(str, Enum):
     CUSTOM = "CUSTOM"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class MapNode:
     map_type: MapType
     args: dict[str, str]
 
 
-@dataclass
+@dataclass(kw_only=True)
 class PluginNode(MapNode):
     plugin: str = None
-    scale: t.Optional[float] = 1
+    scale: float = 1
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CustomNode(MapNode):
     custom_type: t.Optional[str] = None
     parents: dict[str, "MapNode"] = field(default_factory=dict)
@@ -92,7 +77,7 @@ class Mapping:
 
 class MappingReader:
 
-    def read(
+    def build(
         self,
         template: t.Union[Path, str],
         globals_data: t.Union[str, Path, dict],

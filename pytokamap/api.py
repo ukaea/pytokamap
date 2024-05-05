@@ -12,7 +12,7 @@ class MapperAPI:
     @classmethod
     def create(cls, template, global_data):
         reader = MappingReader()
-        mapping = reader.read(template, global_data)
+        mapping = reader.build(template, global_data)
         return MapperAPI(mapping)
 
     def load(self, source: Source, compute: bool = False) -> Datasets:
@@ -37,5 +37,5 @@ class MapperAPI:
         return self.convert(source, target, WriterNames.ZARR, compute)
 
 
-def create_mapping(template, global_data):
+def load_mapping(template, global_data):
     return MapperAPI.create(template, global_data)
