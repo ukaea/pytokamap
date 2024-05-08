@@ -15,6 +15,7 @@ class PluginNames(str, Enum):
 class UDAType(str, Enum):
     IMAGE = "image"
     SIGNAL = "signal"
+    RAW = "raw"
 
 
 class UDAFormat(str, Enum):

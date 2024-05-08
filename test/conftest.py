@@ -103,6 +103,11 @@ def uda_mapping_files(tmpdir):
             "ARGS": {"signal": "ip", "format": "IDA"},
             "SCALE": 1000
         },
+        "rba": {
+            "MAP_TYPE": "PLUGIN",
+            "PLUGIN": "UDA",
+            "ARGS": {"signal": "rba", "format": "IDA", "type": "image"}
+        },
         {% for index in range(1, TCAM.N+1) %}
         "_xsx/tcam_{{index}}": {
             "MAP_TYPE": "PLUGIN",
