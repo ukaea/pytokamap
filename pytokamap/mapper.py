@@ -21,7 +21,7 @@ def read_template(path: str) -> Template:
         return Template(f.read())
 
 
-@dataclass(kw_only=True)
+@dataclass()
 class Mapping:
     pass
 
@@ -31,19 +31,19 @@ class MapType(str, Enum):
     CUSTOM = "CUSTOM"
 
 
-@dataclass(kw_only=True)
+@dataclass()
 class MapNode:
     map_type: MapType
     args: dict[str, str]
 
 
-@dataclass(kw_only=True)
+@dataclass()
 class PluginNode(MapNode):
     plugin: str = None
     scale: float = 1
 
 
-@dataclass(kw_only=True)
+@dataclass()
 class CustomNode(MapNode):
     custom_type: t.Optional[str] = None
     parents: dict[str, "MapNode"] = field(default_factory=dict)
