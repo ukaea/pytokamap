@@ -21,7 +21,7 @@ def read_template(path: str) -> Template:
         return Template(f.read())
 
 
-@dataclass(slots=True)
+@dataclass(kw_only=True)
 class Mapping:
     pass
 
