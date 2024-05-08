@@ -13,9 +13,9 @@ class PluginNames(str, Enum):
 
 
 class UDAType(str, Enum):
-    IMAGE = "image"
-    SIGNAL = "signal"
-    RAW = "raw"
+    IMAGE =  "Image"
+    Analysed = "Analysed"
+    Raw = "Raw"
 
 
 class UDAFormat(str, Enum):
@@ -46,7 +46,7 @@ class LoadUDA(Plugin):
         signal: str,
         format: UDAFormat,
         scale: float = 1,
-        type: UDAType = UDAType.SIGNAL,
+        type: UDAType = UDAType.Raw,
     ):
         super().__init__()
         self.signal = signal
@@ -57,7 +57,7 @@ class LoadUDA(Plugin):
     @dask.delayed()
     def __call__(self, shot: int) -> xr.Dataset:
         client = MASTClient()
-        if self.type == UDAType.SIGNAL:
+        if self.type != UDAType.IMAGE:
             dataset = client.get_signal(shot, self.signal, self.format)
         else:
             dataset = client.get_image(shot, self.signal)
