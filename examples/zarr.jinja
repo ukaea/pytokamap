@@ -1,0 +1,30 @@
+
+{
+    {% macro comma(loop) %}
+        {% if not loop.last %},{% endif %}
+    {% endmacro %}
+
+    "amc/plasma_current": {
+        "MAP_TYPE": "PLUGIN",
+        "PLUGIN": "ZARR",
+        "ARGS": {"signal": "amc/plasma_current"},
+        "SCALE": 1000
+    },
+    {% for index in range(1, TCAM.N+1) %}
+    "_xsx/tcam_{{index}}": {
+        "MAP_TYPE": "PLUGIN",
+        "PLUGIN": "ZARR",
+        "ARGS": {"signal": "xsx/tcam_{{ index }}"}
+    },
+    {% endfor %}
+
+    "xsx/tcam": {
+        "MAP_TYPE": "CUSTOM",
+        "CUSTOM_TYPE": "COMBINE",
+        "ARGS": [
+            {% for index in range(1, TCAM.N+1) %}
+                "_xsx/tcam_{{index}}"{{ comma(loop) }}
+            {% endfor %}
+        ]
+    }
+}
