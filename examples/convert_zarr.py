@@ -10,7 +10,7 @@ def main():
     print(plasma_current)
     
     # Only now is the dataset computed
-    plasma_current.compute()
+    plasma_current = plasma_current.compute()
     print(plasma_current)
     
     # Map to a netcdf file

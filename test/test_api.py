@@ -33,6 +33,7 @@ def test_load_dataset_uda(uda_mapping_files):
     assert isinstance(result, xr.Dataset)
     assert result.data.shape == (30000,)
 
+
 @pytest.mark.skipif(not uda_available, reason="UDA is not available")
 def test_load_dataset_uda_image(uda_mapping_files):
     mapper = pytokamap.load_mapping(*uda_mapping_files)
@@ -43,6 +44,7 @@ def test_load_dataset_uda_image(uda_mapping_files):
     result = datasets["rba"].compute()
     assert isinstance(result, xr.Dataset)
     assert result.data.shape == (3490, 96, 128)
+
 
 def test_convert_zarr_to_netcdf(tmpdir, mapping_files, zarr_file):
     target = tmpdir / "30420.nc"

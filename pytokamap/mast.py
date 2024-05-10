@@ -2,22 +2,22 @@ import re
 from multiprocessing import Process
 import numpy as np
 import xarray as xr
+import pyuda
+
+
+def get_uda_client():
+    client = pyuda.Client()
+    client.set_property("get_meta", True)
+    client.set_property("timeout", 10)
+    return client
 
 
 class MASTClient:
     def __init__(self) -> None:
         pass
 
-    def _get_client(self):
-        import pyuda
-
-        client = pyuda.Client()
-        client.set_property("get_meta", True)
-        client.set_property("timeout", 10)
-        return client
-
     def get_signal(self, shot_num: int, name: str, format: str) -> xr.Dataset:
-        client = self._get_client()
+        client = get_uda_client()
         # Known PyUDA Bug: Old MAST signals names from IDA are truncated to 23 characters!
         # Must truncate name here or we will miss some signals
         if "IDA" in format:
@@ -25,22 +25,22 @@ class MASTClient:
         else:
             signal_name = name
 
-        # Pull the signal on another process first.
-        # Sometimes this segfaults, so first we need to check that we can pull it safely
-        # To do this we pull the signal on a another process and check the error code.
-        def _get_signal(signal_name, shot_num):
-            client = self._get_client()
-            client.get(signal_name, shot_num)
+        # # Pull the signal on another process first.
+        # # Sometimes this segfaults, so first we need to check that we can pull it safely
+        # # To do this we pull the signal on a another process and check the error code.
+        # def _get_signal(signal_name, shot_num):
+        #     client = get_uda_client()
+        #     client.get(signal_name, shot_num)
 
-        p = Process(target=_get_signal, args=(signal_name, shot_num))
-        p.start()
-        p.join()
-        code = p.exitcode
+        # p = Process(target=_get_signal, args=(signal_name, shot_num))
+        # p.start()
+        # p.join()
+        # code = p.exitcode
 
-        if code < 0:
-            raise RuntimeError(
-                f"Failed to get data for {signal_name}/{shot_num}. Possible segfault with exitcode: {code}"
-            )
+        # if code < 0:
+        #     raise RuntimeError(
+        #         f"Failed to get data for {signal_name}/{shot_num}. Possible segfault with exitcode: {code}"
+        #     )
 
         # Now we know it is safe to access the signal and we will not get a segfault
         signal = client.get(signal_name, shot_num)
@@ -49,7 +49,7 @@ class MASTClient:
         return dataset
 
     def get_image(self, shot_num: int, name: str) -> xr.Dataset:
-        client = self._get_client()
+        client = get_uda_client()
         image = client.get_images(name, shot_num)
         dataset = self._convert_image_to_dataset(image)
         dataset.attrs["shot_id"] = shot_num
