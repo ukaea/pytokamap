@@ -2,10 +2,10 @@ import re
 from multiprocessing import Process
 import numpy as np
 import xarray as xr
-import pyuda
 
 
 def get_uda_client():
+    import pyuda
     client = pyuda.Client()
     client.set_property("get_meta", True)
     client.set_property("timeout", 10)
